@@ -671,12 +671,19 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 	}
 	return true;
-}
-		
+}		
 CMD:jetpack(playerid, params[])
 {
 	SetPlayerSpecialAction(playerid, SPECIAL_ACTION_USEJETPACK);
 	return 1;
+}
+CMD:fix(playerid, vehicleid)
+{
+	if(!IsPlayerInAnyVehicle(playerid)) return SendClientMessage(playerid, -2, "[ERROR] You cannot use this command outside of the machine!");
+	RepairVehicle(GetPlayerVehicleID(playerid));
+	SendClientMessage(playerid, -2, "[PROCESS] Your car has been successfully repaired.");
+	return true;
+	
 }
 CMD:kill(playerid, params[])
 {
@@ -800,7 +807,7 @@ stock ShowRegisterDialog(playerid)
 		case 0,1: switch_str = "Not familiar with";
 		default: switch_str = "Familiarized with";
 	}
-	format(str_local, sizeof(str_local), "Правила сервера\t{86a366}%s\n", switch_str), strcat(TextStr, str_local);
+	format(str_local, sizeof(str_local), "Server Rules\t{86a366}%s\n", switch_str), strcat(TextStr, str_local);
 
 	switch(RegData[playerid][pSex]) //тут мы просто проверяем, сколько страниц правил просмотрел игрок
 	{
@@ -829,7 +836,7 @@ stock ShowRegisterDialog(playerid)
 		#if ENCRYPT_PASS
 
 		new encrypt_pass[64];
-		strcat(encrypt_pass, RegData[playerid][pPassword], 64); //лублируем текст, чтобы над ним можно было совершать манипуляции
+		strcat(encrypt_pass, RegData[playerid][pPassword], 64); //дублируем текст, чтобы над ним можно было совершать манипуляции
 		strdel(encrypt_pass, 0, strlen(encrypt_pass)-3); //удаляем все символы, кроме 3 последних
 		for(new s; s < strlen(RegData[playerid][pPassword])-3; s++) strins(encrypt_pass, "*", 0); //вставляем звездочки в начало текста
 
