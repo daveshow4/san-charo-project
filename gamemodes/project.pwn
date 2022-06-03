@@ -118,8 +118,6 @@ public OnGameModeInit()
 	AddPlayerClass(0, 1958.3783, 1343.1572, 15.3746, 269.1425, 0, 0, 0, 0, 0, 0);
 	Interior(); // Интерьер
 	NewMap(); // Маппинг нового города
-
-
 	MySQL = mysql_connect(SQL_HOST, SQL_USER, SQL_DB, SQL_PASS, SQL_PORT, SQL_RECONNECT, SQL_POOLSIZE);
     mysql_log(LOG_ALL, LOG_TYPE_HTML);
     if(mysql_errno() != 0) print("[-] MYSQL Connection does not exist");
@@ -154,7 +152,6 @@ public OnPlayerConnect(playerid)
 	/* форматируем и отправляем запрос */
 	mysql_format(MySQL, db_str, sizeof(db_str), "SELECT * FROM `"TABLE_ACCOUNTS"` WHERE `Nickname` = '%e'", pData[playerid][pName]);
 	mysql_pquery(MySQL, db_str, "IsValidAccount", "d", playerid);
-
 	SetSpawnInfo(playerid, 0, 222, 1128.9762,-1488.1531,22.7690,360.0000, 0, 0, 0, 0, 0, 0); //устанавливаем данные для спавна (необходимо для теста)
 	GetPlayerName(playerid, name_player[playerid], MAX_PLAYER_NAME); 
 	player_status[playerid] = false;
@@ -367,19 +364,19 @@ public LoadPlayerAccount(playerid)
 		pData[playerid][pLevel] = cache_get_field_content_int(0, "Level", MySQL);
 		pData[playerid][pSex] = cache_get_field_content_int(0, "Sex", MySQL);
 		pData[playerid][pAdmin] = cache_get_field_content_int(0, "Admin", MySQL);
-
 		pData[playerid][pLogged] = true; //авторизуем
-		SendClientMessage(playerid, -12, "{fdd9b5}[SYSTEM] | {efdecd}Данные успешно загружены. Приятной игры!");
+		SendClientMessage(playerid, -12, "{fdd9b5}[SYSTEM] | {efdecd}Data uploaded successfully. Have a nice game!");
 		SpawnPlayer(playerid);
 
-		/* Тестовые функции для првоерки загрузки */
-
+		/* Тестовые функции для проверки загрузки */
+		print("-----------------------------------");
 		printf("Nickname: %s", pData[playerid][pName]);
 		printf("DB: %i", pData[playerid][pDatabaseID]);
 		printf("Referal: %s", pData[playerid][pReferal]);
 		printf("Level: %d", pData[playerid][pLevel]);
 		printf("Sex: %d", pData[playerid][pSex]);
 		printf("Admin: %d", pData[playerid][pAdmin]);
+		print("-----------------------------------");
 	}
 	return 1;
 }
@@ -390,12 +387,12 @@ public IsValidAccount(playerid)
 	{
 		cache_get_row(0, 2, pData[playerid][pPassword], MySQL, 64); //заправшиваем пароль для проверки
 
-		SendClientMessage(playerid, -1, "{fdd9b5}[SYSTEM] | {efdecd}Ваш аккаунт успешно найден в базе данных. Пройдите пожалуйста авторизацию");
-		ShowPlayerDialog(playerid, LOG_DIALOG, DIALOG_STYLE_INPUT, "Авторизация", "Ваш аккаунт найден в базе данных\nПожалуйста, авторизуйтесь..", ">>", "Выход");
+		SendClientMessage(playerid, -1, "{fdd9b5}[SYSTEM] | {efdecd}Your account was successfully found in the database. Please log in:");
+		ShowPlayerDialog(playerid, LOG_DIALOG, DIALOG_STYLE_INPUT, "Authorization", "Your account was found in the database\nPlease log in:", ">>", "Exit");
 	}
 	else //если 1 нужный нам аккаунт не найден
 	{
-		SendClientMessage(playerid, -1, "{fdd9b5}[SYSTEM] | {efdecd}Ваш аккаунт не найден в базе данных. Пройдите пожалуйста регистрацию");
+		SendClientMessage(playerid, -1, "{fdd9b5}[SYSTEM] | {efdecd}Your account was not found in the database. Please register:");
 		ResetRegData(playerid); //обнуляем данные
 		ShowRegisterDialog(playerid);
 	}
@@ -410,7 +407,7 @@ public OnPlayerRegister(playerid)
 	pData[playerid][pLogged] = true; //авторизуем
 
 	SpawnPlayer(playerid);
-	SendClientMessage(playerid, -1, "{fdd9b5}[SYSTEM] | {efdecd}Поздравляем с успешной регистрацией!!!");
+	SendClientMessage(playerid, -1, "{fdd9b5}[SYSTEM] | {efdecd}Congratulations on your successful registration!");
 	return 1;
 }
 
@@ -534,14 +531,14 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 			if(strlen(pData[playerid][pPassword]) < MIN_PASS_LENGTH || strlen(pData[playerid][pPassword]) > MAX_PASS_LENGTH)
 			{
-				ShowPlayerDialog(playerid, LOG_DIALOG, DIALOG_STYLE_INPUT, "Авторизация", "Неправильная длинна пароля! Попробуйте ещё раз", ">>", "Выход");
+				ShowPlayerDialog(playerid, LOG_DIALOG, DIALOG_STYLE_INPUT, "Autorization", "Incorrect password length! Try again:", ">>", "Exit");
 				return 1;
 			}
 			if(!strcmp(pData[playerid][pPassword], inputtext, true))
 			{
 				mysql_format(MySQL, load_query, 512, "SELECT * FROM `"TABLE_ACCOUNTS"` WHERE `Nickname` = '%s' AND `Password` = '%s'", pData[playerid][pName], pData[playerid][pPassword]);
 				mysql_tquery(MySQL, load_query, "LoadPlayerAccount", "d", playerid);
-				SendClientMessage(playerid, -12, "{fdd9b5}[SYSTEM] | {efdecd}Идет загрузка данных игрока...");
+				SendClientMessage(playerid, -12, "{fdd9b5}[SYSTEM] | {efdecd}Player data is being loaded..");
 			}
 			else
 			{
@@ -555,7 +552,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					Kick(playerid);
 					return 1;
 				}
-				ShowPlayerDialog(playerid, LOG_DIALOG, DIALOG_STYLE_INPUT, "Авторизация", "Вы ввели неправильный пароль!!! Попробуйте ещё раз", ">>", "Выход");
+				ShowPlayerDialog(playerid, LOG_DIALOG, DIALOG_STYLE_INPUT, "Autorization", "Incorrect password length! Try again:", ">>", "Exit");
 				format(wrong_pass, 8, "~r~%d/3", WrongPass[playerid]);
 				GameTextForPlayer(playerid, wrong_pass, 3000, 6);
 			}
@@ -569,30 +566,30 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				{
 					if(RegData[playerid][pAcceptRules] > 1) //если прочитал все страницы правил
 					{
-						SendClientMessage(playerid, -1, "Вы ознакомилены с правилами");
+						SendClientMessage(playerid, -1, "You are familiar with the rules!");
 						ShowRegisterDialog(playerid);
 						return 1;
 					}
-					ShowPlayerDialog(playerid, REG_DIALOG+1, DIALOG_STYLE_MSGBOX, "Правила сервера", "Правило #1 Не наруйшай правил\nПравило #2 Будь паинькой", ">>", "");
+					ShowPlayerDialog(playerid, REG_DIALOG+1, DIALOG_STYLE_MSGBOX, "Server Rules", "Rules #1: Test\nRules #2: Test", ">>", "");
 					RegData[playerid][pAcceptRules] = 1; //игрок посмотрел первую страницу
 				}
 				case 1: //пол персонажа
 				{
-					ShowPlayerDialog(playerid, REG_DIALOG+2, DIALOG_STYLE_MSGBOX, "Выбор пола персонажа", "Выберите пол вашего персонажа", "Мужской", "Женский");
+					ShowPlayerDialog(playerid, REG_DIALOG+2, DIALOG_STYLE_MSGBOX, "Choosing a character's gender", "Choose the gender of your character", "Male", "Female");
 				}
 				case 2:
 				{
-					ShowPlayerDialog(playerid, REG_DIALOG+3, DIALOG_STYLE_INPUT, "Реферал", "Введите имя игрока, который пригласил вас на сервер", ">>", "Назад");
+					ShowPlayerDialog(playerid, REG_DIALOG+3, DIALOG_STYLE_INPUT, "Referal", "Enter the name of the player who invited you to the server:", ">>", "Назад");
 				}
 				case 3:
 				{
-					ShowPlayerDialog(playerid, REG_DIALOG+4, DIALOG_STYLE_INPUT, "Пароль", "Придумайте пароль для вашего аккаунта", ">>", "Назад");
+					ShowPlayerDialog(playerid, REG_DIALOG+4, DIALOG_STYLE_PASSWORD, "Password", "Come up with a password for your account:", ">>", "Назад");
 				}
 				case 4: //завершение регистрации
 				{
-					if(RegData[playerid][pAcceptRules] < 2) return SendClientMessage(playerid, -1, "Ошибка: Вы не ознакомились с правилами сервера!"), ShowRegisterDialog(playerid);
-					if(!RegData[playerid][pSex]) return SendClientMessage(playerid, -1, "Ошибка: Вы не указали пол персонажа!"), ShowRegisterDialog(playerid);
-					if(strlen(RegData[playerid][pPassword]) < MIN_PASS_LENGTH || strlen(RegData[playerid][pPassword]) > MAX_PASS_LENGTH) return SendClientMessage(playerid, -1, "Ошибка: Вы не указали пароль!"), ShowRegisterDialog(playerid);
+					if(RegData[playerid][pAcceptRules] < 2) return SendClientMessage(playerid, -1, "[ERROR] You haven't read the server rules!"), ShowRegisterDialog(playerid);
+					if(!RegData[playerid][pSex]) return SendClientMessage(playerid, -1, "[ERROR] You didn't specify the gender of the character!"), ShowRegisterDialog(playerid);
+					if(strlen(RegData[playerid][pPassword]) < MIN_PASS_LENGTH || strlen(RegData[playerid][pPassword]) > MAX_PASS_LENGTH) return SendClientMessage(playerid, -1, "[ERROR]You didn't specify a password!"), ShowRegisterDialog(playerid);
 
 					new add_db[512]; //замените этот массив на свой массив, который вы используете для запросов, если он есть
 
@@ -607,7 +604,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					mysql_format(MySQL, add_db, 512, "INSERT INTO `"TABLE_ACCOUNTS"` (`Nickname`, `Password`, `Level`, `Sex`, `Referal`, `Admin`) VALUES ('%s', '%s', 1, '%d', '%s', 0)", pData[playerid][pName], pData[playerid][pPassword], pData[playerid][pSex], pData[playerid][pReferal]);
 					mysql_pquery(MySQL, add_db, "OnPlayerRegister", "d", playerid);
 
-					ResetRegData(playerid); //обнуляем даныне регистрации
+					ResetRegData(playerid); //обнуляем данные регистрации
 
 					/*
 						Запрос на внесение аккаунта в базу добавлен.
@@ -621,11 +618,11 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			if(RegData[playerid][pAcceptRules] > 1)
 			{
-				SendClientMessage(playerid, -1, "Вы успешно ознакомились с правилами сервера");
+				SendClientMessage(playerid, -1, "You have successfully read the server rules!");
 				ShowRegisterDialog(playerid);
 				return 1;
 			}
-			ShowPlayerDialog(playerid, REG_DIALOG+1, DIALOG_STYLE_MSGBOX, "Правила сервера", "Правило #3 Не флуди\nПравило #4 Не вреди", ">>", "");
+			ShowPlayerDialog(playerid, REG_DIALOG+1, DIALOG_STYLE_MSGBOX, "Server Rules", "Rules #3: Test\nRules #4: Test", ">>", "");
 			RegData[playerid][pAcceptRules] = 2;
 			return 1;
 		}
@@ -633,8 +630,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			if(response) RegData[playerid][pSex] = 1;
 			else RegData[playerid][pSex] = 2;
-			SendClientMessage(playerid, -1, "Пол успешно установлен");
-
+			SendClientMessage(playerid, -1, "The sex has been successfully installed");
 			ShowRegisterDialog(playerid);
 			return 1;
 		}
@@ -644,12 +640,12 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 			if(strlen(inputtext) < 4 || strlen(inputtext) > 32)
 			{
-				SendClientMessage(playerid, -1, "Имя реферала должно содержать минимум 3 и максимум 32 символа");
-				ShowPlayerDialog(playerid, REG_DIALOG+3, DIALOG_STYLE_INPUT, "Реферал", "Введите имя игрока, который пригласил вас на сервер", ">>", "Назад");
+				SendClientMessage(playerid, -1, "The referral name must contain a minimum of 3 and a maximum of 32 characters!");
+				ShowPlayerDialog(playerid, REG_DIALOG+3, DIALOG_STYLE_INPUT, "Referal", "Enter the name of the player who invited you to the server:", ">>", "Back");
 				return 1;
 			}
 			format(RegData[playerid][pReferal], 32, inputtext);
-			SendClientMessage(playerid, -1, "Реферал успешно указан");
+			SendClientMessage(playerid, -1, "The referral was successfully specified!");
 
 			ShowRegisterDialog(playerid);
 			return 1;
@@ -662,12 +658,12 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			*/
 			if(strlen(inputtext) < MIN_PASS_LENGTH || strlen(inputtext) > MAX_PASS_LENGTH)
 			{
-				SendClientMessage(playerid, -1, "Недопустимая длинна пароля");
-				ShowPlayerDialog(playerid, REG_DIALOG+4, DIALOG_STYLE_INPUT, "Пароль", "Придумайте пароль для вашего аккаунта", ">>", "Назад");
+				SendClientMessage(playerid, -1, "Invalid password length");
+				ShowPlayerDialog(playerid, REG_DIALOG+4, DIALOG_STYLE_INPUT, "Password", "Come up with a password for your account:", ">>", "Назад");
 				return 1;
 			}
 			format(RegData[playerid][pPassword], 64, inputtext);
-			SendClientMessage(playerid, -1, "Пароль успешно указан");
+			SendClientMessage(playerid, -1, "The password was successfully entered!");
 
 			ShowRegisterDialog(playerid);
 			return 1;
@@ -801,18 +797,18 @@ stock ShowRegisterDialog(playerid)
 
 	switch(RegData[playerid][pAcceptRules]) //тут мы просто проверяем, сколько страниц правил просмотрел игрок
 	{
-		case 0,1: switch_str = "Не ознакомлены";
-		default: switch_str = "Ознакомлены";
+		case 0,1: switch_str = "Not familiar with";
+		default: switch_str = "Familiarized with";
 	}
 	format(str_local, sizeof(str_local), "Правила сервера\t{86a366}%s\n", switch_str), strcat(TextStr, str_local);
 
 	switch(RegData[playerid][pSex]) //тут мы просто проверяем, сколько страниц правил просмотрел игрок
 	{
-		case 1: switch_str = "Мужской";
-		case 2: switch_str = "Женский";
-		default: switch_str = "Не указан";
+		case 1: switch_str = "Male";
+		case 2: switch_str = "Female";
+		default: switch_str = "Not specified";
 	}
-	format(str_local, sizeof(str_local), "Пол персонажа\t{86a366}%s\n", switch_str), strcat(TextStr, str_local);
+	format(str_local, sizeof(str_local), "Gender of the character\t{86a366}%s\n", switch_str), strcat(TextStr, str_local);
 
 	/*
 		Что до пункта реферал, то тут уж можете доделывать, либо заменить на какой угодно параметр
@@ -820,13 +816,13 @@ stock ShowRegisterDialog(playerid)
 	*/
 	if(strlen(RegData[playerid][pReferal]) < 4)
 	{
-		format(str_local, sizeof(str_local), "Реферал\t{86a366}Не указан\n"), strcat(TextStr, str_local);
+		format(str_local, sizeof(str_local), "Referal\t{86a366}Not specified\n"), strcat(TextStr, str_local);
 	}
-	else format(str_local, sizeof(str_local), "Реферал\t{86a366}%s\n", RegData[playerid][pReferal]), strcat(TextStr, str_local);
+	else format(str_local, sizeof(str_local), "Referal\t{86a366}%s\n", RegData[playerid][pReferal]), strcat(TextStr, str_local);
 
 	if(strlen(RegData[playerid][pPassword]) < MIN_PASS_LENGTH || strlen(RegData[playerid][pPassword]) > MAX_PASS_LENGTH)
 	{
-		format(str_local, sizeof(str_local), "Пароль\t{86a366}Не указан\n"), strcat(TextStr, str_local);
+		format(str_local, sizeof(str_local), "Pass\t{86a366}Not specified\n"), strcat(TextStr, str_local);
 	}
 	else //если пароля подходит по длинне
 	{
@@ -837,20 +833,20 @@ stock ShowRegisterDialog(playerid)
 		strdel(encrypt_pass, 0, strlen(encrypt_pass)-3); //удаляем все символы, кроме 3 последних
 		for(new s; s < strlen(RegData[playerid][pPassword])-3; s++) strins(encrypt_pass, "*", 0); //вставляем звездочки в начало текста
 
-		format(str_local, sizeof(str_local), "Пароль\t{86a366}%s\n", encrypt_pass), strcat(TextStr, str_local); //тут необходимо показать измененную строчку
+		format(str_local, sizeof(str_local), "Pass\t{86a366}%s\n", encrypt_pass), strcat(TextStr, str_local); //тут необходимо показать измененную строчку
 
 		#else
 
 		/*
 			Тут мы не используем шифрование, поэтому вставляем RegData[playerid][pPassword]
 		*/
-		format(str_local, sizeof(str_local), "Пароль\t{86a366}%s\n", RegData[playerid][pPassword]), strcat(TextStr, str_local);
+		format(str_local, sizeof(str_local), "Pass\t{86a366}%s\n", RegData[playerid][pPassword]), strcat(TextStr, str_local);
 
 		#endif
 	}
-	format(str_local, sizeof(str_local), "Завершить регистрацию >>"), strcat(TextStr, str_local);
+	format(str_local, sizeof(str_local), "Complete registration >>"), strcat(TextStr, str_local);
 
-	ShowPlayerDialog(playerid, REG_DIALOG, DIALOG_STYLE_TABLIST, "Регистрация", TextStr, ">>",  "");
+	ShowPlayerDialog(playerid, REG_DIALOG, DIALOG_STYLE_TABLIST, "Registration", TextStr, ">>",  "");
 	return 1;
 }
 stock NewMap()
