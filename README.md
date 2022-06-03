@@ -1,1 +1,0 @@
-# san-charo-project
